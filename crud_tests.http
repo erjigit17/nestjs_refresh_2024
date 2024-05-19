@@ -1,0 +1,26 @@
+POST http://localhost:3000/songs
+Content-Type: application/json
+
+{
+  "title": "Kiss",
+  "artists": ["Kiss!", "AC- DC!"],
+  "realisedDate": "2022-09-29",
+  "duration": "03:24"
+}
+###
+GET http://localhost:3000/songs
+###
+GET http://localhost:3000/songs/1
+###
+PATCH http://localhost:3000/songs/1
+Content-Type: application/json
+
+{
+  "title": "Kiss!",
+  "artists": ["Kiss!", "AC- DC!"],
+  "realisedDate": "2024-01-22"
+}
+###
+DELETE  http://localhost:3000/songs/1
+###
+GET http://localhost:3000/songs/1
