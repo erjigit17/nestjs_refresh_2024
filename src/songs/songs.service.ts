@@ -1,55 +1,61 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSongDto } from './dto/create-song.dto';
 import { UpdateSongDto } from './dto/update-song.dto';
-import { SongDto } from './dto/soungDto';
+
+import { SongEntity } from './entities/song.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class SongsService {
-  // local db
-  private songs: SongDto[] = [];
-  private idIndex = (() => {
-    let index = 1;
-    return () => index++;
-  })();
+  constructor(
+    @InjectRepository(SongEntity)
+    private readonly songRepository: Repository<SongEntity>,
+  ) {}
 
-  create(createSongDto: CreateSongDto) {
-    const newSong = {
-      ...createSongDto,
-      id: this.idIndex(),
-    };
-    this.songs.push(newSong);
-    return newSong;
+  async create(createSongDto: CreateSongDto) {
+    return await this.songRepository.save(createSongDto);
   }
 
-  findAll() {
-    return this.songs;
+  async findAll() {
+    return this.songRepository.find();
   }
 
-  findOne(id: number) {
-    const song = this.songs.find((song) => song.id === id);
+  async findOne(id: number) {
+    const song = this.songRepository.findOneBy({ id });
     if (song) {
       return song;
     }
     throw new NotFoundException(`Song with id ${id} not found`);
   }
 
-  update(id: number, updateSongDto: UpdateSongDto) {
-    const oldSongIndex = this.songs.findIndex((song) => song.id === id);
-    if (oldSongIndex !== -1) {
-      this.songs[oldSongIndex] = {
-        ...this.songs[oldSongIndex],
-        ...updateSongDto,
-      };
-      return this.songs[oldSongIndex];
+  async update(id: number, updateSongDto: UpdateSongDto) {
+    const song = await this.songRepository
+      .createQueryBuilder()
+      .update(SongEntity)
+      .set(updateSongDto)
+      .where('id = :id', { id })
+      .returning('*')
+      .execute();
+
+    if (song.affected === 0) {
+      throw new NotFoundException(`Song with id ${id} not found`);
     }
-    throw new NotFoundException(`Song with id ${id} not found`);
+
+    return song.raw[0]; // Return the updated song data
   }
 
-  remove(id: number) {
-    const deletedSongIndex = this.songs.findIndex((song) => song.id === id);
-    if (deletedSongIndex !== -1) {
-      return this.songs.splice(deletedSongIndex)[0];
+  async remove(id: number) {
+    const song = await this.songRepository
+      .createQueryBuilder()
+      .delete()
+      .from(SongEntity)
+      .where('id = :id', { id })
+      .returning('*')
+      .execute();
+    if (song.affected === 0) {
+      throw new NotFoundException(`Song with id ${id} not found`);
     }
-    throw new NotFoundException(`Song with id ${id} not found`);
+    return song.raw[0]; // Return the deleted song data
   }
 }

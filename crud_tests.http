@@ -1,3 +1,4 @@
+### Create a new song
 POST http://localhost:3000/songs
 Content-Type: application/json
 
@@ -5,22 +6,31 @@ Content-Type: application/json
   "title": "Kiss",
   "artists": ["Kiss!", "AC- DC!"],
   "realisedDate": "2022-09-29",
-  "duration": "03:24"
+  "duration": "03:24",
+  "lirics": "lala"
 }
-###
+
+### Get all songs
 GET http://localhost:3000/songs
-###
-GET http://localhost:3000/songs/1
-###
-PATCH http://localhost:3000/songs/1
+
+### Get the created song by ID
+GET http://localhost:3000/songs/{{songId}}
+
+### Update the song using the captured ID
+PATCH http://localhost:3000/songs/{{songId}}
 Content-Type: application/json
 
 {
-  "title": "Kiss!",
+  "title": "Kiss!2",
   "artists": ["Kiss!", "AC- DC!"],
   "realisedDate": "2024-01-22"
 }
-###
-DELETE  http://localhost:3000/songs/1
-###
-GET http://localhost:3000/songs/1
+
+### Delete the song using the captured ID
+DELETE http://localhost:3000/songs/{{songId}}
+
+### Attempt to delete the song again, should result in a 404 error
+DELETE http://localhost:3000/songs/{{songId}}
+
+### Attempt to get the deleted song, should result in a 404 error
+GET http://localhost:3000/songs/{{songId}}
